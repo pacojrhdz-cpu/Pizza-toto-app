@@ -50,4 +50,5 @@ export interface ChecklistRespuesta {
   valor_num: number | null;
   nota: string | null;
   foto_url: string | null;
+  fotos: string[] | null;
 }
