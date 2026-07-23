@@ -14,7 +14,7 @@ const estadoInfo: Record<string, { label: string; clase: string }> = {
 };
 
 interface Item { id: string; descripcion: string; unidad: string | null; critico: boolean; orden: number; }
-interface Resp { item_id: string; estado: string; valor_num: number | null; nota: string | null; foto_url: string | null; }
+interface Resp { item_id: string; estado: string; valor_num: number | null; nota: string | null; foto_url: string | null; fotos: string[] | null; }
 
 export default async function SeguimientoInstancia({ params }: { params: { id: string } }) {
   const profile = await requireProfile();
@@ -35,13 +35,17 @@ export default async function SeguimientoInstancia({ params }: { params: { id: s
 
   const { data: resps } = await supabase
     .from("checklist_respuestas")
-    .select("item_id, estado, valor_num, nota, foto_url")
+    .select("item_id, estado, valor_num, nota, foto_url, fotos")
     .eq("instancia_id", params.id);
 
   const respMap = new Map<string, Resp>();
   for (const r of (resps ?? []) as Resp[]) respMap.set(r.item_id, r);
 
-  const paths = ((resps ?? []) as Resp[]).map((r) => r.foto_url).filter(Boolean) as string[];
+  const paths: string[] = [];
+  for (const r of (resps ?? []) as Resp[]) {
+    const lista = r.fotos && r.fotos.length ? r.fotos : r.foto_url ? [r.foto_url] : [];
+    for (const p of lista) paths.push(p);
+  }
   const urlMap = new Map<string, string>();
   if (paths.length) {
     const { data: signed } = await supabase.storage.from("evidencias").createSignedUrls(paths, 3600);
@@ -68,7 +72,7 @@ export default async function SeguimientoInstancia({ params }: { params: { id: s
           {lista.map((it) => {
             const r = respMap.get(it.id);
             const est = estadoInfo[r?.estado ?? "pendiente"];
-            const foto = r?.foto_url ? urlMap.get(r.foto_url) : null;
+            const fotoPaths = r?.fotos && r.fotos.length ? r.fotos : r?.foto_url ? [r.foto_url] : [];
             const alerta = it.critico && r?.estado === "no_cumple";
             return (
               <li key={it.id} className={`rounded-xl border p-4 ${alerta ? "border-red-300 bg-red-50" : "border-gray-200 bg-white"}`}>
@@ -83,10 +87,18 @@ export default async function SeguimientoInstancia({ params }: { params: { id: s
                   <p className="mt-1 text-sm text-gray-600">Valor: {r.valor_num}{it.unidad ? ` ${it.unidad}` : ""}</p>
                 )}
                 {r?.nota && <p className="mt-1 text-sm text-gray-600">Nota: {r.nota}</p>}
-                {foto && (
-                  <a href={foto} target="_blank" rel="noopener noreferrer">
-                    <img src={foto} alt="evidencia" className="mt-2 h-32 rounded-lg object-cover" />
-                  </a>
+                {fotoPaths.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {fotoPaths.map((p) => {
+                      const url = urlMap.get(p);
+                      if (!url) return null;
+                      return (
+                        <a key={p} href={url} target="_blank" rel="noopener noreferrer">
+                          <img src={url} alt="evidencia" className="h-28 w-28 rounded-lg object-cover" />
+                        </a>
+                      );
+                    })}
+                  </div>
                 )}
               </li>
             );
