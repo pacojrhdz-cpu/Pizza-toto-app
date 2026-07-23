@@ -40,7 +40,7 @@ export default async function ChecklistPage({
 
   const { data: respuestas } = await supabase
     .from("checklist_respuestas")
-    .select("id, instancia_id, item_id, estado, valor_num, nota, foto_url")
+    .select("id, instancia_id, item_id, estado, valor_num, nota, foto_url, fotos")
     .eq("instancia_id", params.id);
 
   return (
