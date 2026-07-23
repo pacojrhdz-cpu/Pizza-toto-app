@@ -9,7 +9,7 @@ export interface RespuestaInput {
   estado: EstadoRespuesta;
   valor_num: number | null;
   nota: string | null;
-  foto_url: string | null;
+  fotos: string[];
 }
 
 export async function guardarChecklist(
@@ -29,7 +29,8 @@ export async function guardarChecklist(
     estado: r.estado,
     valor_num: r.valor_num,
     nota: r.nota,
-    foto_url: r.foto_url,
+    fotos: r.fotos,
+    foto_url: r.fotos[0] ?? null,
     respondido_por: user.id,
     respondido_en: new Date().toISOString(),
   }));
