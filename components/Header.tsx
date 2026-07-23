@@ -22,6 +22,11 @@ export default function Header({ profile }: { profile: Profile }) {
           <Link href="/constancias" className="text-gray-600 hover:text-toto-red">
             Constancias
           </Link>
+          {profile.rol !== "colaborador" && (
+            <Link href="/equipo" className="text-gray-600 hover:text-toto-red">
+              Equipo
+            </Link>
+          )}
           {profile.rol === "gerente" && (
             <Link href="/panel" className="text-gray-600 hover:text-toto-red">
               Panel
