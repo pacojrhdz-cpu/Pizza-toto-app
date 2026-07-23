@@ -23,6 +23,26 @@ export async function guardarChecklist(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "No autenticado" };
 
+  // Candado: si ya está completado y el usuario no es gerente, no se edita.
+  const { data: prof } = await supabase
+    .from("profiles")
+    .select("rol")
+    .eq("id", user.id)
+    .single();
+
+  const { data: inst } = await supabase
+    .from("checklist_instancias")
+    .select("completada")
+    .eq("id", instanciaId)
+    .single();
+
+  if (inst?.completada && prof?.rol !== "gerente") {
+    return {
+      ok: false,
+      error: "Este checklist ya fue completado y no se puede editar.",
+    };
+  }
+
   const filas = respuestas.map((r) => ({
     instancia_id: instanciaId,
     item_id: r.item_id,
