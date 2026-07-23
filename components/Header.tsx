@@ -15,16 +15,19 @@ export default function Header({ profile }: { profile: Profile }) {
         <Link href="/dashboard" className="font-bold text-toto-red">
           Pizza &amp; Totó
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 text-sm">
+          <Link href="/capacitaciones" className="text-gray-600 hover:text-toto-red">
+            Capacitaciones
+          </Link>
+          <Link href="/constancias" className="text-gray-600 hover:text-toto-red">
+            Constancias
+          </Link>
           {profile.rol === "gerente" && (
-            <Link
-              href="/panel"
-              className="text-sm text-gray-600 hover:text-toto-red"
-            >
+            <Link href="/panel" className="text-gray-600 hover:text-toto-red">
               Panel
             </Link>
           )}
-          <span className="hidden text-sm text-gray-500 sm:inline">
+          <span className="hidden text-gray-500 sm:inline">
             {profile.nombre} · {rolLabel[profile.rol]}
           </span>
           <LogoutButton />
